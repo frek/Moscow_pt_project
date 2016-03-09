@@ -22,7 +22,7 @@ var map = L.mapbox.map('map', 'frek.9429268d')
 
 
   var busStops = L.mapbox.featureLayer()
-    .loadURL('../data/busstops.geojson')
+    .loadURL('./data/busstops.geojson')
     .on('ready', function(e) {
     //выдёргиваем из загруженного объекта geoJson-объект
       var source = e.target.getGeoJSON();
