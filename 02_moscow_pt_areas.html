@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset=utf-8 />
+<title>Moscow Public OT</title>
+<meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+<script src='https://api.mapbox.com/mapbox.js/v2.3.0/mapbox.js'></script>
+<link href='https://api.mapbox.com/mapbox.js/v2.3.0/mapbox.css' rel='stylesheet' />
+<style>
+  body { margin:0; padding:0; }
+  #map { position:absolute; top:0; bottom:0; width:100%; }
+</style>
+</head>
+<body>
+<div id='map'></div>
+
+<script>
+L.mapbox.accessToken = 'pk.eyJ1IjoiZnJlayIsImEiOiJjR0NXbTlNIn0.aOtrXBbq8rpDT_7EVHaSpQ';
+
+var map = L.mapbox.map('map', 'frek.9429268d')
+  .setView([55.744537,37.625224], 15);
+
+
+  var busStops = L.mapbox.featureLayer()
+    .loadURL('./data/busstops.geojson')
+    .on('ready', function(e) {
+    //выдёргиваем из загруженного объекта geoJson-объект
+      var source = e.target.getGeoJSON();
+      //чтобы применить стиль, можно указать в geoJson данных стили
+
+
+      function markerColor(routes) {
+
+        //разбиваю входящую строку с номерами маршрутов на массив, ищу наличие определенных элементов в массиве
+        if (routes.split('; ').includes('А25' || 'Тб8')) {
+        return '#007FFF';
+        } else { 
+        return '#FF7F00';
+        };
+        };
+
+/*
+1. загрузить файл в глобальный объект geojson
+2. сделать обработчик событий который загружает и обрабатывает данные заново
+*/
+
+
+
+      source.features.forEach(function(feature) {
+        feature.properties['marker-color'] = markerColor(feature.properties.Attributes.RouteNumbers);
+        feature.properties['marker-symbol'] = 'bus';
+
+      });
+
+      console.log(source);
+
+      //объект который отлично работает с geoJson
+    	L.geoJson(source, {
+  
+
+        pointToLayer: L.mapbox.marker.style, //эта функция для того, чтобы распознать стили в данных, превращает все точки в объекте в отдельные слои-маркеры
+        
+        //данные можно сразу зафильтровать по какому-нибудь признаку
+        // filter: function(feature) {
+        //   return (feature.properties.capacity > 10);
+        // },
+
+
+        //с каждым отдельным объектом в загруженных данных можно что-нибудь сделать
+        onEachFeature: function(feature,layer) {
+
+          //по клику на маркер выводим список маршрутов этой остановки
+          layer.on('click', function(f) {
+
+            routes = feature.properties.Attributes.RouteNumbers;
+            console.log(routes);
+            var id = console.log(feature.properties.Attributes.ID);
+
+          });
+
+        },
+
+      })
+
+			.addTo(map);
+      // тестовая строка — проверяем загрузился ли слой busStops
+      console.log(busStops);
+		});
+
+
+
+</script>
+</body>
+</html>
